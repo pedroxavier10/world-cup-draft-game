@@ -55,7 +55,9 @@ export default function Draft() {
   }, [roll]);
 
   const list = roll
-    ? allTeamPlayers(roll.year, roll.team, picked).sort((a, b) => b[2] - a[2])
+    ? allTeamPlayers(roll.year, roll.team, picked).sort((a, b) =>
+        config.showRatings ? b[2] - a[2] : a[0].localeCompare(b[0])
+      )
     : [];
 
   return (
