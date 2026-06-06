@@ -118,20 +118,6 @@ export default function Setup() {
         )}
       </div>
 
-      <div className="panel" style={{ marginTop: 16 }}>
-        <div className="label">Compete in the World Cup of</div>
-        <div className="seg">
-          {EDITIONS.map((y) => (
-            <Chip
-              key={y}
-              title={String(y)}
-              active={config.compYear === y}
-              onClick={() => setConfig({ compYear: y })}
-            />
-          ))}
-        </div>
-      </div>
-
       <div style={{ marginTop: 18 }}>
         <button className="btn" onClick={start}>
           Start Draft ⚽

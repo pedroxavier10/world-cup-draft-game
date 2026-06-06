@@ -135,7 +135,7 @@ interface Stage {
 
 export function simulate(config: Config, picked: Picked[]): SimResult {
   const strength = teamStrength(picked);
-  const adj = ((config.compYear - 2010) / 16) * 2.2;
+  const adj = 0.55; // fixed to 2014 difficulty level
 
   const stages: Stage[] = [
     { key: "Group · M1", opp: 73 + adj, group: true },

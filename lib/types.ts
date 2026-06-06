@@ -18,7 +18,6 @@ export interface Config {
   showRatings: 0 | 1;
   pool: "all" | "single";
   poolYear: number;
-  compYear: number;
 }
 
 export interface Roll {

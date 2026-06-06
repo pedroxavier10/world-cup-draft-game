@@ -26,7 +26,6 @@ const defaultConfig: Config = {
   showRatings: 1,
   pool: "all",
   poolYear: 2026,
-  compYear: 2026,
 };
 
 export const useGame = create<GameState>((set, get) => ({
