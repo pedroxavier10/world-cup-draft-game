@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useGame } from "@/lib/store";
-import { sectorAvg, clamp } from "@/lib/game";
+import { sectorAvg, clamp, SUB_TO_CAT } from "@/lib/game";
 import { FLAGS } from "@/lib/data";
 import { toast } from "./Toast";
+import Pitch from "./Pitch";
 import type { Pos } from "@/lib/types";
 
 export default function Result() {
@@ -25,6 +26,11 @@ export default function Result() {
   if (!result) return null;
   const R = result;
   const star = R.star;
+
+  const POS_ORDER: Record<string, number> = { FWD: 0, MID: 1, DEF: 2, GK: 3 };
+  const sortedXI = [...picked].sort(
+    (a, b) => POS_ORDER[SUB_TO_CAT[a.pos]] - POS_ORDER[SUB_TO_CAT[b.pos]]
+  );
 
   const sectors: [string, Pos[]][] = [
     ["Defence", ["GK", "DEF"]],
@@ -108,6 +114,24 @@ export default function Result() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="section-h">Your XI</div>
+      <div className="xi-layout">
+        <Pitch />
+        <div className="xi-list">
+          <div className="xi-header">{config.formation} — Overall {R.strength.toFixed(0)}</div>
+          {sortedXI.map((p) => {
+            const cat = SUB_TO_CAT[p.pos];
+            return (
+              <div className="xi-row" key={p.slotIdx}>
+                <span className={`xi-pos cat-${cat.toLowerCase()}`}>{p.pos}</span>
+                <span className="xi-name">{p.name}</span>
+                <span className="xi-meta">{FLAGS[p.team] || ""} {p.team} · {p.year}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       <div className="section-h">Team strength</div>

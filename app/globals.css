@@ -172,6 +172,20 @@ body::before{
 .starcard .si .nm{font-family:var(--font-anton);font-size:22px}
 .starcard .si .mt{font-size:12px;color:var(--mut)}
 
+/* YOUR XI */
+.xi-layout{display:flex;gap:18px;align-items:flex-start}
+@media(max-width:640px){.xi-layout{flex-direction:column;align-items:stretch}}
+.xi-list{flex:1;display:flex;flex-direction:column;gap:6px}
+.xi-header{font-size:13px;color:var(--mut);margin-bottom:4px}
+.xi-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(180deg,var(--panel),rgba(14,36,23,.6));border:1px solid var(--line);border-radius:10px}
+.xi-pos{font-size:10px;font-weight:800;letter-spacing:.06em;padding:3px 7px;border-radius:6px;min-width:36px;text-align:center}
+.xi-pos.cat-fwd{background:rgba(255,93,108,.18);color:var(--red)}
+.xi-pos.cat-mid{background:rgba(25,224,122,.15);color:var(--green)}
+.xi-pos.cat-def{background:rgba(60,130,255,.18);color:#6ab0ff}
+.xi-pos.cat-gk{background:rgba(246,200,63,.18);color:var(--gold)}
+.xi-name{flex:1;font-weight:700;font-size:14px}
+.xi-meta{color:var(--mut);font-size:12px;white-space:nowrap}
+
 .foot{text-align:center;color:var(--mut);font-size:12px;line-height:1.7;margin-top:34px;padding-top:18px;border-top:1px solid var(--line)}
 .foot a{color:var(--green);text-decoration:none}
 .section-h{font-family:var(--font-anton);font-size:20px;letter-spacing:.5px;margin:22px 0 12px;text-transform:uppercase;color:#cdeedb}
