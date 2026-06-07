@@ -1,3 +1,4 @@
+import LZString from "lz-string";
 import type { Config, Picked, SimResult, SubPos } from "./types";
 
 /** Self-contained snapshot of a finished run, embeddable in a share link. */
@@ -50,21 +51,31 @@ export function buildPayload(result: SimResult, picked: Picked[], config: Config
 /* ---- URL-safe, UTF-8-safe base64 (player names carry diacritics) ---- */
 
 export function encodeShare(p: SharePayload): string {
-  const json = JSON.stringify(p);
-  const b64 = btoa(unescape(encodeURIComponent(json)));
+  const b64 = LZString.compressToBase64(JSON.stringify(p));
   return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 export function decodeShare(code: string): SharePayload | null {
+  // Try LZ-compressed format first
   try {
     const b64 = code.replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(escape(atob(b64)));
+    const json = LZString.decompressFromBase64(b64);
+    if (json) {
+      const obj = JSON.parse(json);
+      if (obj && obj.v === 1 && Array.isArray(obj.squad) && obj.star) return obj as SharePayload;
+    }
+  } catch { /* fall through */ }
+
+  // Fall back to legacy plain-base64 format
+  try {
+    const b64 = code.replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+    const json = new TextDecoder().decode(bytes);
     const obj = JSON.parse(json);
     if (obj && obj.v === 1 && Array.isArray(obj.squad) && obj.star) return obj as SharePayload;
-    return null;
-  } catch {
-    return null;
-  }
+  } catch { /* fall through */ }
+
+  return null;
 }
 
 /* ---- Presentation helpers shared by the card, modal and /v page ---- */
