@@ -4,12 +4,14 @@ import Setup from "@/components/Setup";
 import Draft from "@/components/Draft";
 import Result from "@/components/Result";
 import Toast from "@/components/Toast";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function Page() {
   const screen = useGame((s) => s.screen);
 
   return (
     <div className="wrap">
+      <ThemeSwitcher />
       <div className="brand">
         <div className="crest">8-0</div>
         <h1>The Perfect World Cup</h1>

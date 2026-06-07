@@ -1,6 +1,20 @@
 import { create } from "zustand";
-import type { Config, Screen, SubPos, Roll, Picked, SimResult, PlayerTuple } from "./types";
-import { buildSlots, computeRoll, remainingSlots, findSlotIdx, simulate } from "./game";
+import type {
+  Config,
+  Screen,
+  SubPos,
+  Roll,
+  Picked,
+  SimResult,
+  PlayerTuple,
+} from "./types";
+import {
+  buildSlots,
+  computeRoll,
+  remainingSlots,
+  findSlotIdx,
+  simulate,
+} from "./game";
 
 interface GameState {
   screen: Screen;
@@ -16,7 +30,12 @@ interface GameState {
   start: () => void;
   commitRoll: () => void;
   useReroll: () => boolean;
-  pick: (player: PlayerTuple, team: string, year: number, chosenPos: SubPos) => void;
+  pick: (
+    player: PlayerTuple,
+    team: string,
+    year: number,
+    chosenPos: SubPos,
+  ) => void;
   reset: () => void;
 }
 
@@ -72,14 +91,28 @@ export const useGame = create<GameState>((set, get) => ({
     if (slotIdx === -1) return;
     const next: Picked[] = [
       ...picked,
-      { name: player[0], pos: chosenPos, slotIdx, rating: player[2], team, year },
+      {
+        name: player[0],
+        pos: chosenPos,
+        slotIdx,
+        rating: player[2],
+        team,
+        year,
+      },
     ];
     if (next.length >= slots.length) {
-      set({ picked: next, idx: next.length, roll: null, screen: "result", result: simulate(config, next) });
+      set({
+        picked: next,
+        idx: next.length,
+        roll: null,
+        screen: "result",
+        result: simulate(config, next),
+      });
     } else {
       set({ picked: next, idx: next.length, roll: null });
     }
   },
 
-  reset: () => set({ screen: "setup", picked: [], roll: null, result: null, idx: 0 }),
+  reset: () =>
+    set({ screen: "setup", picked: [], roll: null, result: null, idx: 0 }),
 }));
