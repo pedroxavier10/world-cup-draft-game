@@ -1,10 +1,11 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGame } from "@/lib/store";
 import { sectorAvg, clamp, SUB_TO_CAT } from "@/lib/game";
 import { FLAGS } from "@/lib/data";
-import { toast } from "./Toast";
+import { buildPayload } from "@/lib/share";
 import Pitch from "./Pitch";
+import ShareModal from "./ShareModal";
 import type { Pos } from "@/lib/types";
 
 export default function Result() {
@@ -13,6 +14,7 @@ export default function Result() {
   const config = useGame((s) => s.config);
   const reset = useGame((s) => s.reset);
   const barsRef = useRef<HTMLDivElement>(null);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -37,20 +39,6 @@ export default function Result() {
     ["Midfield", ["MID"]],
     ["Attack", ["FWD"]],
   ];
-
-  function share() {
-    const head = R.champion
-      ? R.perfect
-        ? "🏆 8-0 PERFECT! World Champion"
-        : "🏆 World Champion"
-      : `Eliminated in ${R.exitStage}`;
-    const txt = `⚽ The Perfect World Cup\n${head}\nRecord ${R.W}-${R.D}-${R.L} · ${R.GF}-${R.GA} goals\nFormation ${config.formation} · strength ${R.strength.toFixed(1)} · star ${star.name} (${star.rating})\nCan you beat me?`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(txt).then(() => toast("Result copied! 📋"));
-    } else {
-      toast("Copy manually 🙂");
-    }
-  }
 
   const stats: [string, string | number][] = [
     ["Team strength", R.strength.toFixed(1)],
@@ -167,13 +155,17 @@ export default function Result() {
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 22 }}>
-        <button className="btn gold" style={{ fontSize: 17 }} onClick={share}>
+        <button className="btn gold" style={{ fontSize: 17 }} onClick={() => setShareOpen(true)}>
           Share result 📋
         </button>
         <button className="btn ghost" style={{ maxWidth: 220 }} onClick={reset}>
           Play again
         </button>
       </div>
+
+      {shareOpen && (
+        <ShareModal payload={buildPayload(R, picked, config)} onClose={() => setShareOpen(false)} />
+      )}
     </div>
   );
 }
