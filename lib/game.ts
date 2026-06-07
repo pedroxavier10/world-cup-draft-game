@@ -1,4 +1,4 @@
-import { WORLD_CUP_DB, EDITIONS } from "./data";
+import { WORLD_CUP_DB, EDITIONS, FLAGS } from "./data";
 import type { Pos, SubPos, PlayerTuple, Config, Roll, Picked, SimResult, MatchResult, Outcome } from "./types";
 
 export const SUB_TO_CAT: Record<SubPos, Pos> = {
@@ -111,6 +111,51 @@ export function sectorAvg(picked: Picked[], group: Pos[]): number {
   return a.length ? a.reduce((s, p) => s + p.rating, 0) / a.length : 0;
 }
 
+function teamOverall(team: string): number {
+  const players = WORLD_CUP_DB[2026]?.[team] ?? [];
+  if (!players.length) return 70;
+
+  const DEF = new Set<string>(["CB", "LB", "RB", "LWB", "RWB"]);
+  const MID = new Set<string>(["CDM", "CM", "CAM", "LM", "RM"]);
+  const FWD = new Set<string>(["LW", "RW", "ST", "CF"]);
+  const buckets: Record<string, number[]> = { GK: [], DEF: [], MID: [], FWD: [] };
+
+  for (const [, pos, rating] of players) {
+    const primary = Array.isArray(pos) ? pos[0] : pos;
+    if (primary === "GK")      buckets.GK.push(rating);
+    else if (DEF.has(primary)) buckets.DEF.push(rating);
+    else if (MID.has(primary)) buckets.MID.push(rating);
+    else if (FWD.has(primary)) buckets.FWD.push(rating);
+  }
+
+  const top = (arr: number[], n: number) =>
+    [...arr].sort((a, b) => b - a).slice(0, n);
+
+  const selected = [
+    ...top(buckets.GK, 1),
+    ...top(buckets.DEF, 5),
+    ...top(buckets.MID, 5),
+    ...top(buckets.FWD, 3),
+  ];
+
+  return selected.length ? selected.reduce((s, r) => s + r, 0) / selected.length : 70;
+}
+
+function pickOpponent(
+  pool: Array<{ name: string; overall: number }>,
+  targetStrength: number
+): { name: string; overall: number } {
+  const T = 4;
+  const weights = pool.map(t => Math.exp(-Math.abs(t.overall - targetStrength) / T));
+  const total = weights.reduce((s, w) => s + w, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
+}
+
 function poisson(l: number): number {
   const L = Math.exp(-l);
   let k = 0, p = 1;
@@ -147,8 +192,10 @@ export function simulate(config: Config, picked: Picked[]): SimResult {
     { key: "Semi-final", opp: 87 + adj, ko: true },
     { key: "Final", opp: 89 + adj, ko: true, final: true },
   ];
-  const oppNames = ["Opponent A", "Opponent B", "Opponent C", "Round of 16", "Round of 8", "Quarters", "Semi-final", "Final"];
-  const oppFlags = ["🌍", "🌍", "🌍", "⚽", "⚽", "🏆", "🏆", "🏆"];
+  const oppPool = Object.keys(WORLD_CUP_DB[2026] ?? {}).map(name => ({
+    name,
+    overall: teamOverall(name),
+  }));
 
   const matches: MatchResult[] = [];
   let W = 0, D = 0, L = 0, GF = 0, GA = 0, groupPts = 0;
@@ -161,12 +208,17 @@ export function simulate(config: Config, picked: Picked[]): SimResult {
     let outcome: Outcome;
     let pens: string | null = null;
 
+    const opp = oppPool.length ? pickOpponent(oppPool, st.opp) : { name: "Opponent", overall: st.opp };
+    oppPool.splice(oppPool.indexOf(opp), 1);
+    const oppName = opp.name;
+    const oppFlag = FLAGS[opp.name] ?? "🌍";
+
     if (st.group) {
       if (gf > ga) { outcome = "w"; W++; groupPts += 3; }
       else if (gf === ga) { outcome = "d"; D++; groupPts += 1; }
       else { outcome = "l"; L++; }
       GF += gf; GA += ga;
-      matches.push({ stage: st.key, opp: oppNames[i], flag: oppFlags[i], gf, ga, outcome });
+      matches.push({ stage: st.key, opp: oppName, flag: oppFlag, gf, ga, outcome });
       if (i === 2) {
         const advance = groupPts >= 4 || (groupPts === 3 && GF - GA >= 1);
         if (!advance) { eliminated = true; exitStage = "Group Stage"; break; }
@@ -181,7 +233,7 @@ export function simulate(config: Config, picked: Picked[]): SimResult {
         pens = won ? "(gp)" : "(pp)";
         if (won) { outcome = "w"; W++; } else { outcome = "l"; L++; }
       }
-      matches.push({ stage: st.key, opp: oppNames[i], flag: oppFlags[i], gf, ga, outcome, pens });
+      matches.push({ stage: st.key, opp: oppName, flag: oppFlag, gf, ga, outcome, pens });
       if (outcome === "l") { eliminated = true; exitStage = st.key; break; }
       if (st.final && outcome === "w") champion = true;
     }
