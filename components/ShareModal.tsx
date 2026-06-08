@@ -66,6 +66,7 @@ export default function ShareModal({
       const dataUrl = await toPng(cardRef.current, {
         pixelRatio: 2,
         cacheBust: true,
+        skipFonts: true,
       });
       const a = document.createElement("a");
       a.href = dataUrl;

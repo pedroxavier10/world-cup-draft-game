@@ -250,10 +250,12 @@ body::before{
 .sc-placement.gold{color:var(--on-gold);border-color:transparent;background:linear-gradient(180deg,var(--gold-light),var(--gold))}
 
 .sc-squad{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin:18px 0}
-.sc-col{display:flex;flex-direction:column;gap:7px}
+.sc-col{display:flex;flex-direction:column;gap:7px;min-width:0}
 .sc-row{display:flex;align-items:center;gap:8px}
 .sc-name{flex:1;font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:450px){.sc-name{font-size:12px}}
 .sc-rating{font-family:var(--font-anton);font-size:16px;color:var(--green)}
+@media(max-width:450px){.sc-rating{font-size:13px}}
 
 .sc-star{display:flex;align-items:center;gap:14px;border:1px solid rgb(from var(--gold) r g b / .4);border-radius:14px;padding:13px;
   background:radial-gradient(360px 180px at 0 0,rgb(from var(--gold) r g b / .14),transparent)}
@@ -273,6 +275,8 @@ body::before{
 .share-primary{font-size:18px;padding:15px}
 .share-row{display:flex;gap:10px}
 .share-row .btn{flex:1;font-size:14px;padding:13px}
+
+[data-mode="light"] .share-actions .btn.ghost{background:var(--panel);border-color:var(--line)}
 
 /* ===== LIGHT / DARK MODE =====
    data-mode is set on <html> by components/ThemeSwitcher.tsx.
